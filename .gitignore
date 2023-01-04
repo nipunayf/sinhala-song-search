@@ -105,3 +105,4 @@ dist
 
 # IDE directories
 .idea
+**/__pycache__
