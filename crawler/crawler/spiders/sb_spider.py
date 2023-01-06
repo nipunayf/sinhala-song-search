@@ -2,12 +2,12 @@ from scrapy import Spider, Request
 from mtranslate import translate
 from re import sub, split
 
+artists = ['nanda-malani', 'sunil-edirisinghe', 'amaradewa', 'kasun-kalhara', 'edward-jayakody', 'h-r-jothipala',
+           'gunadasa-kapuge']
+
 
 def translate_sinhala(english_text):
     return list(set(translate(x, 'si', 'en') for x in english_text))
-
-
-artists = ['nanda-malani', 'sunil-edirisinghe', 'amaradewa', 'kasun-kalhara']
 
 
 class SinhalaSongBookCrawler(Spider):
