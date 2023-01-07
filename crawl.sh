@@ -7,6 +7,6 @@ cd "${SOURCE_PATH}/crawler" &&
   scrapy crawl songbook -o output.json &&
   cd - || exit
 
-cd "${SOURCE_PATH}/sinhala_lyrics_data" &&
+cd "${SOURCE_PATH}/corpus" &&
   python3 convert.py &&
   cd - || exit 1
