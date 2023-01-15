@@ -1,0 +1,6 @@
+[submodule "elasticsearch/Sinhala-Stopword-list"]
+	path = elasticsearch/sinhala-stopword
+	url = https://github.com/nlpcuom/Sinhala-Stopword-list
+[submodule "elasticsearch/sinhala-news-analysis"]
+	path = elasticsearch/sinhala-stemmer
+	url = git@github.com:rksk/sinhala-news-analysis.git
