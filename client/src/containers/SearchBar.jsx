@@ -1,5 +1,4 @@
 import {
-    Heading,
     HStack,
     IconButton,
     Input,
@@ -27,15 +26,23 @@ function RadioExample() {
     </RadioGroup>)
 }
 
-export default function SearchBar() {
+export default function SearchBar({setData, setAggs, setHits, setQuery}) {
     const [userQuery, setUserQuery] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     async function onSubmit() {
-        console.log(await postRequest(userQuery));
+        setIsLoading(true);
+        const result = await postRequest(userQuery, 0);
+        console.log(result);
+        setData(result.data);
+        setAggs(result.aggs)
+        setHits(result.hits)
+        setQuery(userQuery)
+        setIsLoading(false);
     }
 
-    return (<HStack w={'100%'} h={65} borderWidth="1px" borderRadius="lg" boxShadow={'lg'} p={4} bg={"gray.50"}>
-        <InputGroup pt={1} w={'50%'}>
+    return (<HStack w={'50%'} h={65} borderWidth="1px" borderRadius="lg" boxShadow={'lg'} p={4} bg={"gray.50"}>
+        <InputGroup pt={1} w={'75%'}>
             <InputLeftElement
                 pointerEvents="none"
                 children={<SearchIcon color="white.100"/>}
@@ -52,11 +59,11 @@ export default function SearchBar() {
             />
         </InputGroup>
         <Spacer/>
-        <RadioExample/>
-        <Spacer/>
         <IconButton
+            w={20}
             colorScheme='blue'
             aria-label='Search database'
+            isLoading={isLoading}
             onClick={onSubmit}
             icon={<SearchIcon/>}
         />

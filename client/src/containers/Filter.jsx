@@ -1,39 +1,21 @@
 import {
     VStack,
-    IconButton,
-    Input,
-    InputGroup,
-    InputLeftElement,
-    Spacer,
-    Box,
-    Button,
     Heading,
-    RangeSlider, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderTrack, Checkbox, HStack
+    HStack,
+    Text
 } from "@chakra-ui/react";
-import {SearchIcon} from "@chakra-ui/icons";
+import Page from "./Pagination";
 
-export default function Filter() {
-    return (<VStack
-        w={400} borderWidth="1px" borderRadius="lg" boxShadow={'lg'} p={4} bg={"gray.50"} align={'left'}>
-        <Heading size={14}>Genres:</Heading>
-        <Checkbox>Checkbox</Checkbox>
-        <Checkbox>Checkbox</Checkbox>
-        <Checkbox>Checkbox</Checkbox>
-        <Checkbox>Checkbox</Checkbox>
-        <Checkbox>Checkbox</Checkbox>
-        <Checkbox>Checkbox</Checkbox>
-        <Heading size={14} pt={5}>Views:</Heading>
-        <RangeSlider defaultValue={[120, 240]} min={0} max={300} step={30}>
-            <RangeSliderTrack>
-                <RangeSliderFilledTrack/>
-            </RangeSliderTrack>
-            <RangeSliderThumb boxSize={6} index={0}/>
-            <RangeSliderThumb boxSize={6} index={1}/>
-        </RangeSlider>
-        <Heading size={14} pt={5}>Pagination:</Heading>
-        <HStack>
-            <Button variant={'outline'} colorScheme='blue'>පෙර</Button>
-            <Button variant={'outline'} colorScheme='blue'>පසු</Button>
-        </HStack>
-    </VStack>);
+export default function Filter({genre_count, hits, setData, query}) {
+    return (
+        <VStack
+            w={400} borderWidth="1px" borderRadius="lg" boxShadow={'lg'} p={4} bg={"gray.50"} align={'left'}>
+            <Text>සමස්ත: {hits}</Text>
+            <Heading size={14}>වර්ග:</Heading>
+            {genre_count.map(genre => <Text>{genre.key}: {genre.doc_count}</Text>)}
+            <Heading size={14} pt={5}>පටුන:</Heading>
+            <HStack>
+                <Page hits={hits} setData={setData} query={query}/>
+            </HStack>
+        </VStack>);
 }

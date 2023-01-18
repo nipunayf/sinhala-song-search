@@ -1,13 +1,5 @@
 import axios from "axios";
 
-const generateSuccessOutput = (response) => {
-    console.log(response);
-    return {
-        data: response.data.results,
-        message: response.data.message,
-    }
-}
-
 const generateErrorOutput = (error) => {
     if (error.response)
         return {
@@ -25,10 +17,10 @@ const generateErrorOutput = (error) => {
         }
 }
 
-export const postRequest = async (query) => {
+export const postRequest = async (query, index) => {
     try {
-        let response = await axios.post("http://localhost:5000", {query});
-        return generateSuccessOutput(response);
+        let response = await axios.post("http://localhost:5000", {query, index});
+        return response.data;
     } catch (error) {
         return generateErrorOutput(error);
     }

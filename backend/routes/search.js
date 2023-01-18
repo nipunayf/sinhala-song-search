@@ -6,22 +6,22 @@ const client = new Client({
     cloud: {id: 'cloud_id'},
     auth: {apiKey: 'api_key'}
 })
-
 const keywords = require("../res/keywords.json");
 
 router.post('/', async function (req, res, next) {
     let query = req.body.query;
+    let index = req.body.index;
     const query_words = query.trim().split(" ");
 
     let sorting = false;
     let range = 0;
     const boost_fields = {
         artist: 1,
-        title: 1.2,
+        title: 1,
         composer: 1,
         genre: 1,
         writer: 1,
-        metaphor: 1,
+        metaphor: 1.2,
     }
 
     query_words.forEach(query_word => {
@@ -61,13 +61,20 @@ router.post('/', async function (req, res, next) {
     })
 
 
-    let size = range > 0 ? range : 10;
+    let size = range > 0 ? range : 6;
+    console.log(size);
     let sort = sorting ? [{views: {order: "desc"}}] : [];
 
     const result = await client.search({
         index: 'sinhala-songs',
+        _source: {
+            includes: [
+                "metaphor", "title", "artist", "composer", "writer", "genre"
+            ]
+        },
         body: {
-            size,
+            from: index === 0 ? 0 : index * size + 1,
+            size: size,
             sort,
         }, query: {
             multi_match: {
@@ -78,26 +85,40 @@ router.post('/', async function (req, res, next) {
                 type: 'cross_fields'
             }
         },
+        aggs: {
+            genre_cat: {
+                terms: {
+                    field: "genre",
+                    size: 10
+                }
+            }
+        }
     });
 
-    console.log({
-        index: 'sinhala-songs',
-        body: {
-            size,
-            sort,
-        }, query: {
-            multi_match: {
-                query: query.trim(),
-                fields: [`artist^${boost_fields.artist}`, `title^${boost_fields.title}`, `composer^${boost_fields.composer}`, `genre^${boost_fields.genre}`,
-                    `writer^${boost_fields.writer}`, `metaphor.source^${boost_fields.metaphor}`, `metaphor.line^${boost_fields.metaphor}`, 'lyrics'],
-                operator: "or",
-                type: 'cross_fields'
-            }
-        },
+    let parent_arr = []
+    result.hits.hits.forEach(hit => {
+        hit._source.metaphor.forEach(metaphor => {
+            parent_arr.push({
+                line: metaphor.line,
+                source: metaphor.source,
+                target: metaphor.target,
+                meaning: metaphor.meaning,
+                title: hit._source.title,
+                artist: hit._source.artist,
+                composer: hit._source.composer,
+                writer: hit._source.writer,
+                genre: hit._source.genre,
+            })
+        })
     })
 
-    console.log(result)
-    res.send(result.hits);
+    console.log(result);
+
+    res.send({
+        hits: result.hits.total.value,
+        data: parent_arr,
+        aggs: result.aggregations.genre_cat.buckets
+    });
 });
 
 module.exports = router;
