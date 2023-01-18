@@ -12,6 +12,8 @@ import {
 } from "@chakra-ui/react";
 import {SearchIcon} from "@chakra-ui/icons";
 import {useState} from "react";
+import {postRequest} from "../api";
+import {post} from "axios";
 
 
 function RadioExample() {
@@ -26,6 +28,12 @@ function RadioExample() {
 }
 
 export default function SearchBar() {
+    const [userQuery, setUserQuery] = useState('');
+
+    async function onSubmit() {
+        console.log(await postRequest(userQuery));
+    }
+
     return (<HStack w={'100%'} h={65} borderWidth="1px" borderRadius="lg" boxShadow={'lg'} p={4} bg={"gray.50"}>
         <InputGroup pt={1} w={'50%'}>
             <InputLeftElement
@@ -38,8 +46,9 @@ export default function SearchBar() {
                 type="search"
                 placeholder="ඔබගේ මූල පද ඇතුලත් කරන්න"
                 isRequired
-                onChange={() => {
-                }}
+                onChange={((e) => {
+                    setUserQuery(e.target.value)
+                }).bind(this)}
             />
         </InputGroup>
         <Spacer/>
@@ -48,6 +57,7 @@ export default function SearchBar() {
         <IconButton
             colorScheme='blue'
             aria-label='Search database'
+            onClick={onSubmit}
             icon={<SearchIcon/>}
         />
     </HStack>);

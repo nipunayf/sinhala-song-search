@@ -1,6 +1,8 @@
 import './App.css';
 import {
-    ChakraProvider, HStack, RangeSlider, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderTrack, Spacer,
+    ChakraProvider,
+    HStack,
+    Spacer,
     VStack
 } from "@chakra-ui/react";
 import SearchBar from "./containers/SearchBar";
@@ -10,12 +12,12 @@ import Results from "./containers/Results";
 function App() {
     return (
         <ChakraProvider>
-            <HStack p={8} align={'top'}>
-                <Filter/>
-                <Spacer/>
-                <VStack w={'70%'} pr={6} spacing={8}>
+            <HStack p={8} align={'center'}>
+                {/*<Filter/>*/}
+                {/*<Spacer/>*/}
+                <VStack w={'100%'} pr={6} spacing={8}>
                     <SearchBar/>
-                    <Results />
+                    <Results/>
                 </VStack>
             </HStack>
         </ChakraProvider>
