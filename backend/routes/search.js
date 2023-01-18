@@ -62,7 +62,6 @@ router.post('/', async function (req, res, next) {
 
 
     let size = range > 0 ? range : 6;
-    console.log(size);
     let sort = sorting ? [{views: {order: "desc"}}] : [];
 
     const result = await client.search({
