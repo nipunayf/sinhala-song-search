@@ -15,6 +15,7 @@ router.post('/', async function (req, res, next) {
     let sorting = false;
     const default_size = 6;
     let range = 0;
+    let specific_metaphor = false;
 
 
     let query_template = {
@@ -95,26 +96,47 @@ router.post('/', async function (req, res, next) {
         const boosted_array = [`artist^${boost_fields.artist}`, `title^${boost_fields.title}`, `composer^${boost_fields.composer}`,
             `genre^${boost_fields.genre}`, `writer^${boost_fields.writer}`, 'lyrics']
 
-        specific_metaphor ? generate_general(query_template, query, boosted_array) : generate_specific(query_template, query, boosted_array);
+        specific_metaphor ? generate_specific(query_template, query, boosted_array) : generate_general(query_template, query, boosted_array);
     }
+
+
     const result = await client.search(query_template);
 
     let parent_arr = []
-    result.hits.hits.forEach(hit => {
-        hit._source.metaphor.forEach(metaphor => {
-            parent_arr.push({
-                line: metaphor.line,
-                source: metaphor.source,
-                target: metaphor.target,
-                meaning: metaphor.meaning,
-                title: hit._source.title,
-                artist: hit._source.artist,
-                composer: hit._source.composer,
-                writer: hit._source.writer,
-                genre: hit._source.genre,
+    if (specific_metaphor) {
+        result.hits.hits.forEach(hit => {
+            hit.inner_hits.metaphor.hits.hits.forEach(metaphor => {
+                parent_arr.push({
+                    line: metaphor._source.line,
+                    source: metaphor._source.source,
+                    target: metaphor._source.target,
+                    meaning: metaphor._source.meaning,
+                    title: hit._source.title,
+                    artist: hit._source.artist,
+                    composer: hit._source.composer,
+                    writer: hit._source.writer,
+                    genre: hit._source.genre,
+                })
+
             })
         })
-    })
+    } else {
+        result.hits.hits.forEach(hit => {
+            hit._source.metaphor.forEach(metaphor => {
+                parent_arr.push({
+                    line: metaphor.line,
+                    source: metaphor.source,
+                    target: metaphor.target,
+                    meaning: metaphor.meaning,
+                    title: hit._source.title,
+                    artist: hit._source.artist,
+                    composer: hit._source.composer,
+                    writer: hit._source.writer,
+                    genre: hit._source.genre,
+                })
+            })
+        })
+    }
 
     res.send({
         hits: result.hits.total.value,
