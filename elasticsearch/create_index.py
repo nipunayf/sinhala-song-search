@@ -1,9 +1,29 @@
-import elasticsearch
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 
+
+def create_dictionary(f):
+    word_dict = []
+    for line in f:
+        word_dict.append(line.rstrip().replace('\t', ' => '))
+    return word_dict
+
+
 # Configure elasticsearch
-client = IndicesClient(Elasticsearch('http://localhost:9200'))
+es = Elasticsearch('http://localhost:9200')
+client = IndicesClient(es)
+
+# Read the stop words
+with open('stop_words.txt') as f:
+    stop_words = [line.rstrip() for line in f.readlines()]
+
+# Read the stem words
+with open('stem_words.txt') as f:
+    stem_words = create_dictionary(f)
+
+# Read the synonym words
+with open('synonym_words.txt') as f:
+    synonym_words = create_dictionary(f)
 
 # Define setting and mapping configurations
 settings = {
@@ -16,17 +36,24 @@ settings = {
             "sinhala_text_analyzer": {
                 "type": "custom",
                 "tokenizer": "standard",
-                "filter": ["sinhala_stopword", "sinhala_stem"]
+                "filter": ["sinhala_stopword", "sinhala_synonym", "sinhala_stem"]
             }
         },
         "filter": {
             "sinhala_stopword": {
                 "type": "stop",
-                "stopwords_path": "analyzer/stop.txt"
+                "stopwords": stop_words
+                # "stopwords_path": "analyzer/stop_words.txt" # Use if you copy the analyzer to es config directory
             },
             'sinhala_stem': {
                 "type": "stemmer_override",
-                'rules_path': 'analyzer/stem.txt'
+                "rules": stem_words
+                # 'rules_path': 'analyzer/stem.txt' # Use if you copy the analyzer to es config directory
+            },
+            "sinhala_synonym": {
+                "type": "synonym",
+                "synonyms": synonym_words,
+                # "synonyms_path": "analysis/synonym.txt"  # Use if you copy the analyzer to es config directory
             }
         }
     }
@@ -39,37 +66,57 @@ mappings = {
         },
         "artist": {
             "type": "text",
-            "analyzer": "standard"
+            "analyzer": "standard",
+            "fields": {
+                "keyword": {
+                    "type": "keyword"
+                }
+            }
         },
         "composer": {
             "type": "text",
-            "analyzer": "standard"
+            "analyzer": "standard",
+            "fields": {
+                "keyword": {
+                    "type": "keyword"
+                }
+            }
         },
         "genre": {
             "type": "keyword"
         },
         "writer": {
             "type": "text",
-            "analyzer": "standard"
+            "analyzer": "standard",
+            "fields": {
+                "keyword": {
+                    "type": "keyword"
+                }
+            }
         },
         "views": {
             "type": "integer"
         },
-        "metaphor.line": {
-            "type": "text",
-            "analyzer": "sinhala_text_analyzer"
-        },
-        "metaphor.source": {
-            "type": "text",
-            "analyzer": "sinhala_text_analyzer"
-        },
-        "metaphor.target": {
-            "type": "text",
-            "analyzer": "sinhala_text_analyzer"
-        },
-        "metaphor.meaning": {
-            "type": "text",
-            "analyzer": "sinhala_text_analyzer"
+        "metaphor": {
+            "type": "nested",
+            "properties": {
+                "line": {
+                    "type": "text",
+                    "analyzer": "sinhala_text_analyzer"
+                },
+                "source": {
+                    "type": "text",
+                    "analyzer": "sinhala_text_analyzer"
+                },
+                "target": {
+                    "type": "text",
+                    "analyzer": "sinhala_text_analyzer"
+                },
+                "meaning": {
+                    "type": "text",
+                    "analyzer": "sinhala_text_analyzer"
+                }
+            }
         }
     }
 }
