@@ -11,6 +11,13 @@ function generate_all(template, default_size) {
     };
 }
 
+/**
+ * Generate multi_match query for non-metaphor fields
+ *
+ * @param query
+ * @param boosted_fields
+ * @returns {{query: *, fields, type: string, operator: string}}
+ */
 function generate_multi_match(query, boosted_fields) {
     return {
         query: query.trim(),
@@ -20,6 +27,12 @@ function generate_multi_match(query, boosted_fields) {
     }
 }
 
+/**
+ * Generate nested query for metaphor field
+ *
+ * @param query
+ * @returns {{path: string, query: {multi_match: {query: *, fields: string[]}}, inner_hits: {}}}
+ */
 function generate_nested_query(query) {
     return {
         path: "metaphor",
@@ -33,6 +46,13 @@ function generate_nested_query(query) {
     };
 }
 
+/**
+ * Generate query for general queries
+ *
+ * @param template
+ * @param query
+ * @param boost_fields
+ */
 function generate_general(template, query, boost_fields) {
     template.query = {
         bool: {
@@ -45,6 +65,13 @@ function generate_general(template, query, boost_fields) {
     }
 }
 
+/**
+ * Generate query for metaphor specific query
+ *
+ * @param template
+ * @param query
+ * @param boost_fields
+ */
 function generate_specific(template, query, boost_fields) {
     template.query = {
         bool: {

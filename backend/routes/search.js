@@ -17,7 +17,7 @@ router.post('/', async function (req, res, next) {
     let range = 0;
     let specific_metaphor = false;
 
-
+    // Template query used by each generate
     let query_template = {
         index: 'sinhala-songs',
         _source: {
@@ -42,7 +42,6 @@ router.post('/', async function (req, res, next) {
     if (query.length === 0) {
         generate_all(query_template, default_size);
     } else { // Apply field boosting and filtering
-        let specific_metaphor = false;
         const query_words = query.trim().split(" ");
         const boost_fields = {
             artist: 1,
@@ -89,19 +88,22 @@ router.post('/', async function (req, res, next) {
             query = changed ? query.replace(query_word, '') : query;
         })
 
-
+        // Adding sorting and ranging if exists
         query_template.body.sort = sorting ? [{views: {order: "desc"}}] : [];
         query_template.body.size = range > 0 ? range : default_size;
 
+        // Apply field boosting
         const boosted_array = [`artist^${boost_fields.artist}`, `title^${boost_fields.title}`, `composer^${boost_fields.composer}`,
             `genre^${boost_fields.genre}`, `writer^${boost_fields.writer}`, 'lyrics']
 
+        // Filter only the metaphors if the keyword is found. Else, apply to all the fields
         specific_metaphor ? generate_specific(query_template, query, boosted_array) : generate_general(query_template, query, boosted_array);
     }
 
-
+    // Fetch the results from elastic search
     const result = await client.search(query_template);
 
+    // Process the results based on whether user wants selected metaphors
     let parent_arr = []
     if (specific_metaphor) {
         result.hits.hits.forEach(hit => {
